@@ -24,7 +24,7 @@ uint8_t crc8_dvb_s2(uint8_t crc, unsigned char a)
     return crc8_dvb_s2_instance.calc(crc ^ a);
 }
 
-MSP::MSP() : m_inputState(MSP_IDLE)
+MSP::MSP() : m_inputState(MSP_IDLE), crsf_to_gcs_buf_count(0)
 {
 }
 
@@ -306,4 +306,11 @@ MSP::awaitPacket(mspPacket_t* packet, Stream* port, uint32_t timeoutMillis)
     }
     DBGLN("MSP::awaitPacket Exceeded timeout while waiting for packet");
     return false;
+}
+
+void 
+MSP::send_udp(mspPacket_t* packet){
+    if (crsf_to_gcs_buf_count < CRSF_BUF_SIZE){
+        crsf_to_gcs_buf[crsf_to_gcs_buf_count++] = *packet;
+    }
 }

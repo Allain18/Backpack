@@ -8,6 +8,13 @@
 // for custom OSD text.
 #define MSP_PORT_INBUF_SIZE 64
 
+// Size of the buffer that we will use to store CRSF packets in units of mspPacket_t
+constexpr size_t CRSF_BUF_SIZE = 16;
+// Threshold at which we will flush the buffer
+constexpr size_t CRSF_BUF_THRESHOLD = CRSF_BUF_SIZE / 2;
+// Timeout for flushing the buffer in ms
+constexpr size_t CRSF_BUF_TIMEOUT = 100;
+
 #define CHECK_PACKET_PARSING() \
   if (packet->readError) {\
     return;\
@@ -96,6 +103,10 @@ public:
     uint8_t         convertToByteArray(mspPacket_t* packet, uint8_t* byteArray);
     uint8_t         getTotalPacketSize(mspPacket_t* packet);
     bool            awaitPacket(mspPacket_t* packet, Stream* port, uint32_t timeoutMillis);
+    uint16_t        GetQueuedMsgCount() { return crsf_to_gcs_buf_count; }
+    void            ResetQueuedMsgCount() { crsf_to_gcs_buf_count = 0;}
+    void            send_udp(mspPacket_t* packet);
+    mspPacket_t*    GetQueuedMsgs() { return crsf_to_gcs_buf; }
 
 private:
     mspState_e  m_inputState;
@@ -103,4 +114,6 @@ private:
     uint8_t     m_inputBuffer[MSP_PORT_INBUF_SIZE];
     mspPacket_t m_packet;
     uint8_t     m_crc;
+    uint16_t    crsf_to_gcs_buf_count;
+    mspPacket_t crsf_to_gcs_buf[CRSF_BUF_SIZE];
 };

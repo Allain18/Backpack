@@ -224,9 +224,13 @@ void ProcessMSPPacketFromTX(mspPacket_t *packet)
 
   case MSP_ELRS_BACKPACK_CRSF_TLM:
     DBGLN("Processing MSP_ELRS_BACKPACK_CRSF_TLM...");
-    if (config.GetTelemMode() != BACKPACK_TELEM_MODE_OFF)
+    if (config.GetTelemMode() == BACKPACK_TELEM_MODE_ESPNOW)
     {
       sendMSPViaEspnow(packet);
+    }
+    else if (config.GetTelemMode() == BACKPACK_TELEM_MODE_WIFI)
+    {
+      msp.send_udp(packet);
     }
     break;
 
